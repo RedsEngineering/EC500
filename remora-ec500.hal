@@ -16,20 +16,9 @@ loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EM
 
 # estop and SPI comms enable and feedback
 
-	loadrt estop_latch
-	loadrt and2
-	
-	net button-estop <= and2.0.in0 <= remora.input.05.not
-	net estop-status <= estop-latch.0.ok-in <= and2.0.out
-
-
-	net user-enable-out	<= and2.0.in1 <=	iocontrol.0.user-enable-out	=>	remora.enable
+	net user-enable-out	<=	iocontrol.0.user-enable-out	=>	remora.enable
 	net user-request-enable	<=	iocontrol.0.user-request-enable	=>	remora.reset
 	net remora-status	<=	remora.status			=>	iocontrol.0.emc-enable-in
-
-	addf and2.0					servo-thread
-
-
 
 
 # add the remora and motion functions to threads
@@ -112,3 +101,8 @@ net spindle-cmd-rpm spindle.0.speed-out => scale.0.in       # Map spindle speed 
 net spindle-cmd-rpm-abs scale.0.out => abs.0.in             # Get absolute value of scaled output
 net spindle-speed-DAC abs.0.out => remora.SP.0              # Send scaled speed to Remora SP.0
 
+
+#########
+# ESTOP #
+#########
+	net estop-ext	<=	remora.input.05		=>	halui.estop.activate
