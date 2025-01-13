@@ -106,3 +106,17 @@ net spindle-speed-DAC abs.0.out => remora.SP.0              # Send scaled speed 
 # ESTOP #
 #########
 	net estop-ext	<=	remora.input.05		=>	halui.estop.activate
+	
+#########
+# PROBE #
+#########
+	net probe-in	<=	remora.input.09
+	
+#################
+# HOME SWITCHES #
+#################
+
+	net X-max       remora.input.08         => joint.0.home-sw-in
+	net Y-min       remora.input.11         => joint.1.home-sw-in
+	net Z-max       remora.input.10         => joint.2.home-sw-in
+

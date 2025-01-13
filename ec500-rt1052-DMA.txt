@@ -214,7 +214,6 @@
 		"Comment":			"IN12",
 		"Pin":				"P3_23",
 		"Mode":				"Input",
-		"Modifier":                     "Pull Down",
 		"Data Bit":			15,
 		"Invert":			"True"
 	},
