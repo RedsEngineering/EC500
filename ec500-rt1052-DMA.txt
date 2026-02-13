@@ -54,7 +54,7 @@
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"X-Limit Switch",
+		"Comment":			"X-Limit Switch - IN01",
 		"Pin":				"P3_25",
 		"Mode":				"Input",
 		"Data Bit":			4,
@@ -64,16 +64,16 @@
 	"Thread": "Servo",
 	"Type": "Digital Pin",
 		"Comment":			"IN02",
-		"Pin":				"Y Limit Switch",
+		"Pin":				"Y Limit Switch - IN02",
 		"Mode":				"Input",
 		"Data Bit":			5,
 		"Invert":			"True"
 	},
-	{
+	   {
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"IN03",
-		"Pin":				"Z Limit Switch",
+		"Comment":			"Z Limit Switch - IN03",
+		"Pin":				"P4_14",
 		"Mode":				"Input",
 		"Data Bit":			6,
 		"Invert":			"True"
@@ -81,7 +81,7 @@
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"Touch Off Probe",
+		"Comment":			"A Limit Switch - IN04",
 		"Pin":				"P3_24",
 		"Mode":				"Input",
 		"Data Bit":			7,
@@ -91,19 +91,28 @@
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"Bed Leveling Probe",
-		"Pin":				"P4_31",
+		"Comment":			"Bed Leveling Probe - IN05",
+		"Pin":				"P3_18",
 		"Mode":				"Input",
-		"Data Bit":			9,
+		"Data Bit":			8,
 		"Invert":			"True"
 	},
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"IN05 - Input IN02 (EMERGENCY STOP BUTTON)",
-		"Pin":				"P3_18",
+		"Comment":			" Touch Off Probe - IN06",
+		"Pin":				"P4_31",
 		"Mode":				"Input",
-		"Data Bit":			8,
+		"Data Bit":			9,
+		"Invert":			"True"
+	},
+    {
+	"Thread": "Servo",
+	"Type": "Digital Pin",
+		"Comment":			"EMERGENCY STOP BUTTON - IN07 ",
+		"Pin":				"P4_27",
+		"Mode":				"Input",
+		"Data Bit":			10,
 		"Invert":			"True"
 	},
 	{
