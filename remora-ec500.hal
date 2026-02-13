@@ -65,10 +65,21 @@ net j3enable    joint.3.amp-enable-out  =>  remora.joint.3.enable
 #################
 # Map data bits from config.txt to LinuxCNC joints
 
-net X-home-limit   <=  remora.input.04  =>  joint.0.home-sw-in  joint.0.neg-lim-sw-in
+# Delete the separate X and Z limit lines and replace with this:
+
+# Shared X and Z Limit/Home on IN01 (Bit 4)
+net XZ-shared   <=  remora.input.04
+net XZ-shared   =>  joint.0.home-sw-in
+net XZ-shared   =>  joint.0.neg-lim-sw-in
+net XZ-shared   =>  joint.2.home-sw-in
+net XZ-shared   =>  joint.2.pos-lim-sw-in
+
+# Y stays on IN02 (Bit 5)
 net Y-home-limit   <=  remora.input.05  =>  joint.1.home-sw-in  joint.1.neg-lim-sw-in
-net Z-home-limit   <=  remora.input.06  =>  joint.2.home-sw-in  joint.2.pos-lim-sw-in
+
+# A stays on IN04 (Bit 7)
 net A-home-limit   <=  remora.input.07  =>  joint.3.home-sw-in
+
 
 #########
 # ESTOP #
