@@ -50,30 +50,6 @@
 		"Dir Hold":		5
 	},
 	{
-	"Thread": "DMA",
-	"Type": "DMAstepgen",
-		"Comment":		"B - Joint 4 step generator",
-		"Joint Number":		4,
-		"Step Pin":		"P1_16",
-		"Direction Pin":	"P1_23",
-		"Step Length":		3,
-		"Step Space":		3,
-		"Dir Setup":		5,
-		"Dir Hold":		5
-	},
-	{
-	"Thread": "DMA",
-	"Type": "DMAstepgen",
-		"Comment":		"C - Joint 5 step generator",
-		"Joint Number":		5,
-		"Step Pin":		"P1_20",
-		"Direction Pin":	"P1_19",
-		"Step Length":		3,
-		"Step Space":		3,
-		"Dir Setup":		5,
-		"Dir Hold":		5
-	},
-	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
 		"Comment":			"FHA",
