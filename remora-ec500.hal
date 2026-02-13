@@ -1,122 +1,90 @@
-# Basic HAL config file for NVEM controller board running Remora firmware
-# Configured for 3 joints (A, Y, Z axes) with home and limit switches
+# Basic HAL config file for EC500 running Remora firmware
+# Configured for 4 joints (X, Y, Z, A) matching custom config.txt
 
 loadrt [KINS]KINEMATICS
 loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
-
 
 ##########
 # REMORA #
 ##########
 
-# load the Remora real-time component
+# Load the Remora Ethernet component. 
+# Ensure PRU_base_freq matches your config.txt "Base frequency"
+loadrt remora-eth-3.0 PRU_base_freq=100000
 
-	loadrt remora-eth-3.0 PRU_base_freq=500000
+# Estop and communication status
+net user-enable-out     <=  iocontrol.0.user-enable-out     =>  remora.enable
+net user-request-enable <=  iocontrol.0.user-request-enable =>  remora.reset
+net remora-status       <=  remora.status                   =>  iocontrol.0.emc-enable-in
 
-
-# estop and SPI comms enable and feedback
-
-	net user-enable-out	<=	iocontrol.0.user-enable-out	=>	remora.enable
-	net user-request-enable	<=	iocontrol.0.user-request-enable	=>	remora.reset
-	net remora-status	<=	remora.status			=>	iocontrol.0.emc-enable-in
-
-
-# add the remora and motion functions to threads
-
-	addf remora.read 		servo-thread
-	addf motion-command-handler 	servo-thread
-	addf motion-controller 		servo-thread
-	addf remora.update-freq 	servo-thread
-	addf remora.write 		servo-thread
+# Add functions to thread
+addf remora.read                servo-thread
+addf motion-command-handler     servo-thread
+addf motion-controller          servo-thread
+addf remora.update-freq         servo-thread
+addf remora.write               servo-thread
 
 ########
 # AXES #
 ########
 
+# Joint 0 (X axis)
+setp remora.joint.0.scale       [JOINT_0]SCALE
+setp remora.joint.0.maxaccel    [JOINT_0]STEPGEN_MAXACCEL
+setp remora.joint.0.pgain       [JOINT_0]PGAIN
+net j0pos-cmd   joint.0.motor-pos-cmd   =>  remora.joint.0.pos-cmd
+net j0pos-fb    remora.joint.0.pos-fb   =>  joint.0.motor-pos-fb
+net j0enable    joint.0.amp-enable-out  =>  remora.joint.0.enable
 
-# joint 0 setup (X axis)
+# Joint 1 (Y axis)
+setp remora.joint.1.scale       [JOINT_1]SCALE
+setp remora.joint.1.maxaccel    [JOINT_1]STEPGEN_MAXACCEL
+setp remora.joint.1.pgain       [JOINT_1]PGAIN
+net j1pos-cmd   joint.1.motor-pos-cmd   =>  remora.joint.1.pos-cmd
+net j1pos-fb    remora.joint.1.pos-fb   =>  joint.1.motor-pos-fb
+net j1enable    joint.1.amp-enable-out  =>  remora.joint.1.enable
 
-	setp remora.joint.0.scale	[JOINT_0]SCALE
-	setp remora.joint.0.maxaccel	[JOINT_0]STEPGEN_MAXACCEL
-	setp remora.joint.0.pgain	[JOINT_0]PGAIN
+# Joint 2 (Z axis)
+setp remora.joint.2.scale       [JOINT_2]SCALE
+setp remora.joint.2.maxaccel    [JOINT_2]STEPGEN_MAXACCEL
+setp remora.joint.2.pgain       [JOINT_2]PGAIN
+net j2pos-cmd   joint.2.motor-pos-cmd   =>  remora.joint.2.pos-cmd
+net j2pos-fb    remora.joint.2.pos-fb   =>  joint.2.motor-pos-fb
+net j2enable    joint.2.amp-enable-out  =>  remora.joint.2.enable
 
-	net j0pos-cmd		joint.0.motor-pos-cmd	=>	remora.joint.0.pos-cmd
-	net j0pos-fb		remora.joint.0.pos-fb	=>	joint.0.motor-pos-fb
-	net j0enable		joint.0.amp-enable-out	=>	remora.joint.0.enable
+# Joint 3 (A axis)
+setp remora.joint.3.scale       [JOINT_3]SCALE
+setp remora.joint.3.maxaccel    [JOINT_3]STEPGEN_MAXACCEL
+setp remora.joint.3.pgain       [JOINT_3]PGAIN
+net j3pos-cmd   joint.3.motor-pos-cmd   =>  remora.joint.3.pos-cmd
+net j3pos-fb    remora.joint.3.pos-fb   =>  joint.3.motor-pos-fb
+net j3enable    joint.3.amp-enable-out  =>  remora.joint.3.enable
 
+#################
+# HOME / LIMITS #
+#################
+# Map data bits from config.txt to LinuxCNC joints
 
-# joint 1 setup (Y axis)
-
-	setp remora.joint.1.scale	[JOINT_1]SCALE
-	setp remora.joint.1.maxaccel	[JOINT_1]STEPGEN_MAXACCEL
-	setp remora.joint.1.pgain	[JOINT_1]PGAIN
-
-	net j1pos-cmd		joint.1.motor-pos-cmd	=>	remora.joint.1.pos-cmd
-	net j1pos-fb		remora.joint.1.pos-fb	=>	joint.1.motor-pos-fb
-	net j1enable		joint.1.amp-enable-out	=>	remora.joint.1.enable
-
-
-# joint 2 setup (Z axis)
-
-	setp remora.joint.2.scale	[JOINT_2]SCALE
-	setp remora.joint.2.maxaccel	[JOINT_2]STEPGEN_MAXACCEL
-	setp remora.joint.2.pgain	[JOINT_2]PGAIN
-
-	net j2pos-cmd		joint.2.motor-pos-cmd	=>	remora.joint.2.pos-cmd
-	net j2pos-fb		remora.joint.2.pos-fb	=>	joint.2.motor-pos-fb
-	net j2enable		joint.2.amp-enable-out	=>	remora.joint.2.enable
-	
-# joint 3 setup (A axis)
-
-	setp remora.joint.3.scale	[JOINT_3]SCALE
-	setp remora.joint.3.maxaccel	[JOINT_3]STEPGEN_MAXACCEL
-	setp remora.joint.3.pgain	[JOINT_3]PGAIN
-
-	net j3pos-cmd		joint.3.motor-pos-cmd	=>	remora.joint.3.pos-cmd
-	net j3pos-fb		remora.joint.3.pos-fb	=>	joint.3.motor-pos-fb
-	net j3enable		joint.3.amp-enable-out	=>	remora.joint.3.enable
-	
-###########
-# Spindle #
-###########
-
-# Forward/Reverse Control
-net spindle-fwd spindle.0.forward => remora.output.00   # Map spindle forward command to FWD pin
-net spindle-rev spindle.0.reverse => remora.output.01   # Map spindle reverse command to REV pin
-
-# Load and configure PWM generator
-loadrt pwmgen output_type=1  # Load PWM generator (type 1: PWM output)
-loadrt scale count=1         # Load 1 scaling component
-loadrt abs count=1           # Load 1 absolute value component
-
-# Add components to servo thread
-addf scale.0 servo-thread     # Add scaling component to servo thread
-addf abs.0 servo-thread       # Add absolute value component to servo thread
-
-# Configure scaling for spindle RPM to voltage
-setp scale.0.gain 0.00416666667   # <MAX VOLTAGE> / <MAX RPM> = 10 / 24000 = 0.00416666667
-
-# Map spindle speed command to scaled output
-net spindle-cmd-rpm spindle.0.speed-out => scale.0.in       # Map spindle speed to scaling input
-net spindle-cmd-rpm-abs scale.0.out => abs.0.in             # Get absolute value of scaled output
-net spindle-speed-DAC abs.0.out => remora.SP.0              # Send scaled speed to Remora SP.0
-
+net X-home-limit   <=  remora.input.04  =>  joint.0.home-sw-in  joint.0.neg-lim-sw-in
+net Y-home-limit   <=  remora.input.05  =>  joint.1.home-sw-in  joint.1.neg-lim-sw-in
+net Z-home-limit   <=  remora.input.06  =>  joint.2.home-sw-in  joint.2.pos-lim-sw-in
+net A-home-limit   <=  remora.input.07  =>  joint.3.home-sw-in
 
 #########
 # ESTOP #
 #########
-	net estop-ext	<=	remora.input.05		=>	halui.estop.activate
-	
-#########
-# PROBE #
-#########
-	net probe-in	<=	remora.input.09
-	
-#################
-# HOME SWITCHES #
-#################
+# Bit 10 was mapped to IN07 in your config
+net estop-ext      <=  remora.input.10  =>  iocontrol.0.emc-enable-in
 
-	net X-max       remora.input.08         => joint.0.home-sw-in
-	net Y-min       remora.input.11         => joint.1.home-sw-in
-	net Z-max       remora.input.10         => joint.2.home-sw-in
+##########
+# PROBES #
+##########
+# Bit 8 = Bed Leveling (IN05), Bit 9 = Touch Off (IN06)
+net probe-bed      <=  remora.input.08  =>  motion.probe-input
+net probe-touch    <=  remora.input.09
 
+###########
+# Spindle #
+###########
+# Note: Since you aren't using outputs in config.txt, 
+# remora.output.00/01 will not function unless added to JSON.
