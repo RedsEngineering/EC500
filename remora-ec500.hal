@@ -1,36 +1,92 @@
+# Basic HAL config for NVEM/EC500 with Remora firmware
+# Proper tandem gantry setup: joints 1 and 2 both control Y axis (XYYZ kinematics)
+# X = joint 0, Y master = joint 1, Y slave = joint 2, Z = joint 3
+# Feedback shared from master to slave to prevent following errors
+
+loadrt [KINS]KINEMATICS
+loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
+
+##########
+# REMORA #
+##########
+
+loadrt remora-eth-3.0 PRU_base_freq=500000
+
+net user-enable-out <= iocontrol.0.user-enable-out => remora.enable
+net user-request-enable <= iocontrol.0.user-request-enable => remora.reset
+net remora-status <= remora.status => iocontrol.0.emc-enable-in
+
+addf remora.read servo-thread
+addf motion-command-handler servo-thread
+addf motion-controller servo-thread
+addf remora.update-freq servo-thread
+addf remora.write servo-thread
+
+########
+# AXES #
+########
+
+# Joint 0 - X axis
+setp remora.joint.0.scale [JOINT_0]SCALE
+setp remora.joint.0.maxaccel [JOINT_0]STEPGEN_MAXACCEL
+setp remora.joint.0.pgain [JOINT_0]PGAIN
+net x-pos-cmd  joint.0.motor-pos-cmd  => remora.joint.0.pos-cmd
+net x-pos-fb   remora.joint.0.pos-fb  => joint.0.motor-pos-fb
+net x-enable   joint.0.amp-enable-out => remora.joint.0.enable
+
+# Joint 1 - Y MASTER
+setp remora.joint.1.scale [JOINT_1]SCALE
+setp remora.joint.1.maxaccel [JOINT_1]STEPGEN_MAXACCEL
+setp remora.joint.1.pgain [JOINT_1]PGAIN
+net y-master-cmd  joint.1.motor-pos-cmd  => remora.joint.1.pos-cmd
+net y-master-fb   remora.joint.1.pos-fb  => joint.1.motor-pos-fb 
+net y-master-enable joint.1.amp-enable-out => remora.joint.1.enable
+
+# Joint 2 - Y SLAVE (Physical A-Axis Port)
+setp remora.joint.2.scale [JOINT_2]SCALE
+setp remora.joint.2.maxaccel [JOINT_2]STEPGEN_MAXACCEL
+setp remora.joint.2.pgain [JOINT_2]PGAIN
+
+
+# Link to Motion
+net y-slave-cmd    joint.2.motor-pos-cmd  => remora.joint.2.pos-cmd
+net y-slave-fb     remora.joint.2.pos-fb  => joint.2.motor-pos-fb
+net y-slave-enable joint.2.amp-enable-out => remora.joint.2.enable
+
+
+# Joint 3 - Z axis
+setp remora.joint.3.scale [JOINT_3]SCALE
+setp remora.joint.3.maxaccel [JOINT_3]STEPGEN_MAXACCEL
+setp remora.joint.3.pgain [JOINT_3]PGAIN
+net z-pos-cmd  joint.3.motor-pos-cmd  => remora.joint.3.pos-cmd
+net z-pos-fb   remora.joint.3.pos-fb  => joint.3.motor-pos-fb
+net z-enable   joint.3.amp-enable-out => remora.joint.3.enable
+
 #################
 # HOME / LIMITS #
 #################
 
-# --- Shared X and Z Limit/Home (IN01 - Data Bit 4) ---
-net XZ-shared-limit <= remora.input.04
-net XZ-shared-limit => joint.0.home-sw-in
-net XZ-shared-limit => joint.0.neg-lim-sw-in
-net XZ-shared-limit => joint.2.home-sw-in
-net XZ-shared-limit => joint.2.pos-lim-sw-in
 
-# --- Y Limit/Home (IN02 - Data Bit 5) ---
-net Y-home-limit   <= remora.input.05
-net Y-home-limit   => joint.1.home-sw-in
-net Y-home-limit   => joint.1.neg-lim-sw-in
+net x-lim      <= remora.input.01.not => joint.0.home-sw-in joint.0.neg-lim-sw-in
+net y-mast-lim <= remora.input.02.not => joint.1.home-sw-in joint.1.neg-lim-sw-in
+net z-lim      <= remora.input.03.not => joint.3.home-sw-in joint.3.pos-lim-sw-in
+net y-slav-lim <= remora.input.04.not => joint.2.home-sw-in joint.2.neg-lim-sw-in
 
-# --- A Home (IN04 - Data Bit 7) ---
-net A-home-limit   <= remora.input.07
-net A-home-limit   => joint.3.home-sw-in
+
+
+
+
+
+#########
+# PROBE #
+#########
+
+net probe-in <= remora.input.05
+net touch-off <= remora.input.06
 
 #########
 # ESTOP #
 #########
-# External E-Stop button on IN07 (Data Bit 10)
-net estop-ext      <= remora.input.10
-net estop-ext      => iocontrol.0.emc-enable-in
 
-##########
-# PROBES #
-##########
-# Bed Leveling (IN05 - Bit 8) linked to probe input
-net probe-in       <= remora.input.08
-net probe-in       => motion.probe-input
-
-# Touch Off (IN06 - Bit 9) for manual measurement
-net touch-off      <= remora.input.09
+# Stay commented - only use if you wire an actual external ESTOP button to input 07
+# net estop-ext <= remora.input.07 => remora.reset
